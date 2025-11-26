@@ -1,0 +1,157 @@
+import { Schema, model, models, Document, Model } from 'mongoose';
+
+/**
+ * Core Event attributes as stored in MongoDB.
+ */
+export interface EventAttrs {
+  title: string;
+  slug: string;
+  description: string;
+  overview: string;
+  image: string;
+  venue: string;
+  location: string;
+  date: string; // ISO date string (YYYY-MM-DD)
+  time: string; // 24h time string (HH:MM)
+  mode: string;
+  audience: string;
+  agenda: string[];
+  organizer: string;
+  tags: string[];
+}
+
+/**
+ * Event document type with Mongoose-managed timestamps.
+ */
+export interface EventDocument extends EventAttrs, Document {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface EventModel extends Model<EventDocument> {}
+
+/**
+ * Helper to generate a URL-safe slug from an event title.
+ */
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Normalize a date input to `YYYY-MM-DD` (ISO calendar date) format.
+ */
+function normalizeDate(dateInput: string): string {
+  const parsed = new Date(dateInput);
+
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error('Invalid event date');
+  }
+
+  // Convert to ISO string and keep only the date portion.
+  return parsed.toISOString().split('T')[0];
+}
+
+/**
+ * Normalize time into a strict 24h `HH:MM` format.
+ */
+function normalizeTime(timeInput: string): string {
+  const trimmed = timeInput.trim();
+  const match = /^([01]?\d|2[0-3]):?(\d{2})$/.exec(trimmed);
+
+  if (!match) {
+    throw new Error('Invalid event time; expected 24h HH:MM');
+  }
+
+  const hours = match[1].padStart(2, '0');
+  const minutes = match[2];
+
+  return `${hours}:${minutes}`;
+}
+
+const requiredString = {
+  type: String,
+  required: true,
+  trim: true,
+  validate: {
+    validator: (value: string) => value.trim().length > 0,
+    message: 'Field is required and cannot be empty',
+  },
+};
+
+const requiredStringArray = {
+  type: [String],
+  required: true,
+  validate: {
+    validator: (value: string[]) =>
+      Array.isArray(value) &&
+      value.length > 0 &&
+      value.every((v) => typeof v === 'string' && v.trim().length > 0),
+    message: 'Array must contain at least one non-empty string',
+  },
+};
+
+const eventSchema = new Schema<EventDocument, EventModel>(
+  {
+    title: requiredString,
+    slug: {
+      ...requiredString,
+      unique: true, // Unique index for slug-based lookups.
+    },
+    description: requiredString,
+    overview: requiredString,
+    image: requiredString,
+    venue: requiredString,
+    location: requiredString,
+    date: requiredString,
+    time: requiredString,
+    mode: requiredString,
+    audience: requiredString,
+    agenda: requiredStringArray,
+    organizer: requiredString,
+    tags: requiredStringArray,
+  },
+  {
+    timestamps: true, // Automatically manage createdAt/updatedAt.
+    strict: true,
+  }
+);
+
+// Unique index on slug to enforce URL uniqueness at the database level.
+eventSchema.index({ slug: 1 }, { unique: true });
+
+/**
+ * Pre-save hook to:
+ * - generate or update the slug when the title changes
+ * - normalize and validate date and time fields.
+ */
+eventSchema.pre<EventDocument>('save', function preSave(next) {
+  try {
+    // Generate slug only if title is new or modified.
+    if (this.isModified('title')) {
+      const slug = generateSlug(this.title);
+
+      if (!slug) {
+        throw new Error('Slug cannot be empty');
+      }
+
+      this.slug = slug;
+    }
+
+    // Normalize date and time on every save to keep them consistent.
+    this.date = normalizeDate(this.date);
+    this.time = normalizeTime(this.time);
+
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
+
+export const Event: EventModel =
+  (models.Event as EventModel) || model<EventDocument, EventModel>('Event', eventSchema);
+
+export default Event;
