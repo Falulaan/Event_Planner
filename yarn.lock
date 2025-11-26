@@ -1162,6 +1162,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@posthog/core@npm:1.6.0":
+  version: 1.6.0
+  resolution: "@posthog/core@npm:1.6.0"
+  dependencies:
+    cross-spawn: "npm:^7.0.6"
+  checksum: 10c0/28aa907bb21b18587bc5f47c44349ebc834b37d9a4cedb1a18d7b673d4d7cdad2120dda80deceaee707b2f52333e9a08a8e591e1fc4066521ce05e820b76309f
+  languageName: node
+  linkType: hard
+
 "@react-aria/focus@npm:^3.20.2":
   version: 3.21.2
   resolution: "@react-aria/focus@npm:3.21.2"
@@ -2386,6 +2395,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"core-js@npm:^3.38.1":
+  version: 3.47.0
+  resolution: "core-js@npm:3.47.0"
+  checksum: 10c0/9b1a7088b7c660c7b8f1d4c90bb1816a8d5352ebdcb7bc742e3a0e4eb803316b5aa17bacb8769522342196351a5430178f46914644f2bfdb94ce0ced3c7fd523
+  languageName: node
+  linkType: hard
+
 "cors@npm:^2.8.5":
   version: 2.8.5
   resolution: "cors@npm:2.8.5"
@@ -3316,6 +3332,13 @@ __metadata:
     node-domexception: "npm:^1.0.0"
     web-streams-polyfill: "npm:^3.0.3"
   checksum: 10c0/60054bf47bfa10fb0ba6cb7742acec2f37c1f56344f79a70bb8b1c48d77675927c720ff3191fa546410a0442c998d27ab05e9144c32d530d8a52fbe68f843b69
+  languageName: node
+  linkType: hard
+
+"fflate@npm:^0.4.8":
+  version: 0.4.8
+  resolution: "fflate@npm:0.4.8"
+  checksum: 10c0/29d1eddaaa5deab61b1c6b0d21282adacadbc4d2c01e94d8b1ee784398151673b9c563e53f97a801bc410a1ae55e8de5378114a743430e643e7a0644ba8e5a42
   languageName: node
   linkType: hard
 
@@ -4758,6 +4781,8 @@ __metadata:
     lucide-react: "npm:^0.553.0"
     next: "npm:16.0.1"
     ogl: "npm:^1.0.11"
+    posthog-js: "npm:^1.298.0"
+    posthog-node: "npm:^5.14.0"
     react: "npm:19.2.0"
     react-dom: "npm:19.2.0"
     shadcn: "npm:^3.5.0"
@@ -5215,6 +5240,35 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10c0/5127cc7c91ed7a133a1b7318012d8bfa112da9ef092dddf369ae699a1f10ebbd89b1b9f25f3228795b84585c72aabd5ced5fc11f2ba467eedf7b081a66fad024
+  languageName: node
+  linkType: hard
+
+"posthog-js@npm:^1.298.0":
+  version: 1.298.0
+  resolution: "posthog-js@npm:1.298.0"
+  dependencies:
+    "@posthog/core": "npm:1.6.0"
+    core-js: "npm:^3.38.1"
+    fflate: "npm:^0.4.8"
+    preact: "npm:^10.19.3"
+    web-vitals: "npm:^4.2.4"
+  checksum: 10c0/aa2269d4ca84af76bf5c6e3442d081bae84761a644463b388f652c5574ba75050d986247e68558e92b522cdf585d7d106ac0b092b62552cfde0b68a01b5eca9b
+  languageName: node
+  linkType: hard
+
+"posthog-node@npm:^5.14.0":
+  version: 5.14.0
+  resolution: "posthog-node@npm:5.14.0"
+  dependencies:
+    "@posthog/core": "npm:1.6.0"
+  checksum: 10c0/ca2d9ac9dfb525a24dc20ed9040e1df519712955542508b88de18341468ae366856c777ed87755af34901ceee10f88b62de09d63697f3d2924403f86db265bd5
+  languageName: node
+  linkType: hard
+
+"preact@npm:^10.19.3":
+  version: 10.27.2
+  resolution: "preact@npm:10.27.2"
+  checksum: 10c0/951b708f7afa34391e054b0f1026430e8f5f6d5de24020beef70288e17067e473b9ee5503a994e0a80ced014826f56708fea5902f80346432c22dfcf3dff4be7
   languageName: node
   linkType: hard
 
@@ -6517,6 +6571,13 @@ __metadata:
   version: 3.3.3
   resolution: "web-streams-polyfill@npm:3.3.3"
   checksum: 10c0/64e855c47f6c8330b5436147db1c75cb7e7474d924166800e8e2aab5eb6c76aac4981a84261dd2982b3e754490900b99791c80ae1407a9fa0dcff74f82ea3a7f
+  languageName: node
+  linkType: hard
+
+"web-vitals@npm:^4.2.4":
+  version: 4.2.4
+  resolution: "web-vitals@npm:4.2.4"
+  checksum: 10c0/383c9281d5b556bcd190fde3c823aeb005bb8cf82e62c75b47beb411014a4ed13fa5c5e0489ed0f1b8d501cd66b0bebcb8624c1a75750bd5df13e2a3b1b2d194
   languageName: node
   linkType: hard
 
