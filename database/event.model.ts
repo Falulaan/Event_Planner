@@ -51,8 +51,11 @@ function normalizeDate(dateInput: string): string {
     throw new Error('Invalid event date');
   }
 
-  // Convert to ISO string and keep only the date portion.
-  return parsed.toISOString().split('T')[0];
+  // Use local date components to avoid timezone shift
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
