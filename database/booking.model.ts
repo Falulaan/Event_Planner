@@ -54,26 +54,24 @@ const bookingSchema = new Schema<BookingDocument, BookingModel>(
 // Secondary index on eventId for efficient queries.
 bookingSchema.index({ eventId: 1 });
 
+// Compound unique index to prevent duplicate bookings (same event + email).
+bookingSchema.index({ eventId: 1, email: 1 }, { unique: true });
+
 /**
- * Pre-save hook to verify that the referenced Event exists and email is valid.
+ * Pre-save hook to verify that the referenced Event exists.
+ * Email validation is already handled by the schema validator.
+ * This hook only validates on new bookings or when eventId is modified.
  */
-bookingSchema.pre<BookingDocument>('save', async function preSave(next) {
-  try {
-    if (!isValidEmail(this.email)) {
-      throw new Error('Invalid email address');
+bookingSchema.pre<BookingDocument>('save', async function preSave() {
+    // Only validate eventId if it's new or modified to avoid redundant checks
+    if (this.isNew || this.isModified('eventId')) {
+        // Ensure the referenced event exists before creating a booking
+        const eventExists = await Event.exists({_id: this.eventId});
+
+        if (!eventExists) {
+            throw new Error('Cannot create booking: referenced event does not exist');
+        }
     }
-
-    // Ensure the referenced event exists before creating a booking.
-    const eventExists = await Event.exists({ _id: this.eventId });
-
-    if (!eventExists) {
-      throw new Error('Cannot create booking: referenced event does not exist');
-    }
-
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
 });
 
 export const Booking: BookingModel =
