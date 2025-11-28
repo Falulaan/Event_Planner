@@ -167,8 +167,11 @@ eventSchema.pre<EventDocument>('save', function preSave(next) {
     this.date = normalizeDate(this.date);
     this.time = normalizeTime(this.time);
 
+  }catch (error) {
   }
-});
+}
+
+);
 
 export const Event: EventModel =
   (models.Event as EventModel) || model<EventDocument, EventModel>('Event', eventSchema);

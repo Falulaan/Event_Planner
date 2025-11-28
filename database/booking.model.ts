@@ -32,7 +32,6 @@ const bookingSchema = new Schema<BookingDocument, BookingModel>(
       type: Schema.Types.ObjectId,
       ref: 'Event',
       required: true,
-      index: true, // Index improves lookups by event.
     },
     email: {
       type: String,
@@ -50,9 +49,6 @@ const bookingSchema = new Schema<BookingDocument, BookingModel>(
     strict: true,
   }
 );
-
-// Secondary index on eventId for efficient queries.
-bookingSchema.index({ eventId: 1 });
 
 // Compound unique index to prevent duplicate bookings (same event + email).
 bookingSchema.index({ eventId: 1, email: 1 }, { unique: true });
