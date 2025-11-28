@@ -150,28 +150,22 @@ eventSchema.index({ slug: 1 }, { unique: true });
  * - generate or update the slug when the title changes
  * - normalize and validate date and time fields.
  */
-eventSchema.pre<EventDocument>('save', function preSave(next) {
-  try {
-    // Generate slug only if title is new or modified.
-    if (this.isModified('title')) {
-      const slug = generateSlug(this.title);
+eventSchema.pre<EventDocument>('save', async function preSave() {
+  // Generate slug only if title is new or modified.
+  if (this.isModified('title')) {
+    const slug = generateSlug(this.title);
 
-      if (!slug) {
-        throw new Error('Slug cannot be empty');
-      }
-
-      this.slug = slug;
+    if (!slug) {
+      throw new Error('Slug cannot be empty');
     }
 
-    // Normalize date and time on every save to keep them consistent.
-    this.date = normalizeDate(this.date);
-    this.time = normalizeTime(this.time);
-
-  }catch (error) {
+    this.slug = slug;
   }
-}
 
-);
+  // Normalize date and time on every save to keep them consistent.
+  this.date = normalizeDate(this.date);
+  this.time = normalizeTime(this.time);
+});
 
 export const Event: EventModel =
   (models.Event as EventModel) || model<EventDocument, EventModel>('Event', eventSchema);
