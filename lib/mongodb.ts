@@ -38,36 +38,50 @@ if (!global._mongoose) {
  * This function is safe to call multiple times; it will reuse an existing
  * connection if one is already established, or reuse an in-flight connection
  * promise if a connection attempt is already in progress.
+ *
+ * @returns Promise<Connection> - The active MongoDB connection
+ * @throws Error if MONGODB_URI is not defined or connection fails
  */
 export async function connectToDatabase(): Promise<Connection> {
-  // Your MongoDB connection string should be provided via environment variable.
-  // Example for local dev: 'mongodb://localhost:27017/my-db'
+  // Retrieve MongoDB connection string from environment variable
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
-    throw new Error('Please define the MONGODB_URI environment variable');
+    throw new Error(
+      'Please define the MONGODB_URI environment variable inside .env.local'
+    );
   }
 
-  // If an active connection already exists, reuse it.
+  // If an active connection already exists, reuse it
   if (cached.conn) {
     return cached.conn;
   }
 
-  // If no connection promise exists yet, create one and store it in the cache.
+  // If no connection promise exists yet, create one and store it in the cache
   if (!cached.promise) {
-    cached.promise = mongoose.connect(uri, {
-      // Add connection options here as needed, e.g.:
-      // maxPoolSize: 10,
-      // serverSelectionTimeoutMS: 5000,
+    const opts = {
+      bufferCommands: false, // Disable buffering to fail fast if not connected
+    };
+
+    cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
+      console.log('✅ MongoDB connected successfully');
+      return mongooseInstance;
     });
   }
 
-  // Wait for the connection to resolve, then cache and return the underlying
-  // Mongoose Connection instance.
-  const mongooseInstance = await cached.promise;
-  cached.conn = mongooseInstance.connection;
+  try {
+    // Wait for the connection to resolve, then cache and return the underlying
+    // Mongoose Connection instance
+    const mongooseInstance = await cached.promise;
+    cached.conn = mongooseInstance.connection;
 
-  return cached.conn;
+    return cached.conn;
+  } catch (error) {
+    // Reset the promise on error so the next call attempts reconnection
+    cached.promise = null;
+    console.error('❌ MongoDB connection error:', error);
+    throw error;
+  }
 }
 
 export default connectToDatabase;

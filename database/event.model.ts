@@ -60,17 +60,36 @@ function normalizeDate(dateInput: string): string {
 
 /**
  * Normalize time into a strict 24h `HH:MM` format.
+ * Supports both 24-hour format (HH:MM) and 12-hour format (HH:MM AM/PM).
  */
 function normalizeTime(timeInput: string): string {
   const trimmed = timeInput.trim();
-  const match = /^([01]?\d|2[0-3]):?(\d{2})$/.exec(trimmed);
 
-  if (!match) {
-    throw new Error('Invalid event time; expected 24h HH:MM');
+  // Check for 12-hour format with AM/PM
+  const amPmMatch = /^(1[0-2]|0?[1-9]):([0-5][0-9])\s?(AM|PM)$/i.exec(trimmed);
+  if (amPmMatch) {
+    let hours = parseInt(amPmMatch[1], 10);
+    const minutes = amPmMatch[2];
+    const period = amPmMatch[3].toUpperCase();
+
+    // Convert to 24-hour format
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
   }
 
-  const hours = match[1].padStart(2, '0');
-  const minutes = match[2];
+  // Check for 24-hour format
+  const match24h = /^([01]?\d|2[0-3]):([0-5][0-9])$/.exec(trimmed);
+  if (!match24h) {
+    throw new Error('Invalid event time; expected HH:MM or HH:MM AM/PM');
+  }
+
+  const hours = match24h[1].padStart(2, '0');
+  const minutes = match24h[2];
 
   return `${hours}:${minutes}`;
 }
@@ -131,27 +150,21 @@ eventSchema.index({ slug: 1 }, { unique: true });
  * - generate or update the slug when the title changes
  * - normalize and validate date and time fields.
  */
-eventSchema.pre<EventDocument>('save', function preSave(next) {
-  try {
-    // Generate slug only if title is new or modified.
-    if (this.isModified('title')) {
-      const slug = generateSlug(this.title);
+eventSchema.pre<EventDocument>('save', async function preSave() {
+  // Generate slug only if title is new or modified.
+  if (this.isModified('title')) {
+    const slug = generateSlug(this.title);
 
-      if (!slug) {
-        throw new Error('Slug cannot be empty');
-      }
-
-      this.slug = slug;
+    if (!slug) {
+      throw new Error('Slug cannot be empty');
     }
 
-    // Normalize date and time on every save to keep them consistent.
-    this.date = normalizeDate(this.date);
-    this.time = normalizeTime(this.time);
-
-    next();
-  } catch (error) {
-    next(error as Error);
+    this.slug = slug;
   }
+
+  // Normalize date and time on every save to keep them consistent.
+  this.date = normalizeDate(this.date);
+  this.time = normalizeTime(this.time);
 });
 
 export const Event: EventModel =
